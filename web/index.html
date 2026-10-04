@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>610 设计理论 · 备考工作台</title>
+<style>
+  :root{
+    --bg:#FAF9F5; --panel:#FFFFFF; --line:#E6E2D8; --line2:#D6D1C4;
+    --ink:#2C2C2A; --ink2:#5F5E5A; --ink3:#8A877E;
+    --blue:#185FA5; --blue-bg:#E6F1FB; --blue-ink:#0C447C;
+    --teal:#0F6E56; --teal-bg:#E1F5EE; --teal-ink:#085041;
+    --amber:#BA7517; --amber-bg:#FAEEDA; --amber-ink:#854F0B;
+    --red:#A32D2D; --red-bg:#FCEBEB;
+    --r:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    display:flex; flex-direction:column;
+  }
+  header{
+    background:var(--panel); border-bottom:1px solid var(--line);
+    padding:10px 14px; display:flex; align-items:center; gap:10px; flex-shrink:0;
+  }
+  header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.3px}
+  header .sub{font-size:12px;color:var(--ink3);margin-left:auto}
+  .btn{
+    border:1px solid var(--line2); background:var(--panel); color:var(--ink);
+    padding:6px 12px; border-radius:8px; font-size:13px; cursor:pointer;
+    font-family:inherit; transition:.15s;
+  }
+  .btn:hover{background:#F2F0EA}
+  .btn.primary{background:var(--blue); border-color:var(--blue); color:#fff}
+  .btn.primary:hover{background:#14508C}
+  .btn.primary:disabled{background:#B9C6D4; border-color:#B9C6D4; cursor:not-allowed}
+  .btn.small{padding:4px 9px; font-size:12px}
+  nav{display:flex; gap:6px; padding:8px 14px 0; background:var(--panel); flex-shrink:0;
+      border-bottom:1px solid var(--line); overflow-x:auto}
+  nav button{
+    border:none; background:none; font-family:inherit; font-size:14px; color:var(--ink2);
+    padding:8px 12px 9px; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap;
+  }
+  nav button.on{color:var(--blue-ink); border-bottom-color:var(--blue); font-weight:600}
+  main{flex:1; overflow-y:auto; padding:14px; -webkit-overflow-scrolling:touch}
+  .tab{display:none; max-width:820px; margin:0 auto}
+  .tab.on{display:block}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin-bottom:12px}
+  .muted{color:var(--ink3); font-size:13px}
+  .opt{font-size:12px; color:#16a34a; background:#dcfce7; padding:1px 7px; border-radius:20px; margin-left:6px; font-weight:500}
+  .help{display:inline-block; font-size:12px; color:var(--blue); text-decoration:none; margin:2px 0 12px; border-bottom:1px dashed var(--blue)}
+  .help:hover{border-bottom-style:solid}
+  .tut{margin:6px 0 14px; border:1px solid var(--line); border-radius:var(--r); background:#FCFBF7}
+  .tut summary{cursor:pointer; padding:11px 14px; font-size:13.5px; font-weight:600; color:var(--blue); list-style:none}
+  .tut summary::-webkit-details-marker{display:none}
+  .tut summary::before{content:'▸ '; display:inline-block; transition:transform .15s}
+  .tut[open] summary::before{content:'▾ '}
+  .tutBody{padding:2px 14px 14px; border-top:1px solid var(--line)}
+  .tutItem{margin-top:12px}
+  .tutH{font-size:13px; font-weight:700; color:var(--ink); margin-bottom:6px}
+  .tutBody ol{margin:0; padding-left:20px; font-size:13px; line-height:1.85; color:var(--ink2)}
+  .tutBody ol strong{color:var(--ink)}
+  .tutBody code{background:var(--bg); padding:1px 5px; border-radius:4px; font-size:12px; font-family:ui-monospace,Menlo,Consolas,monospace}
+  .tutBody a{color:var(--blue)}
+  .tutTip{margin-top:6px; font-size:12.5px; line-height:1.7; color:var(--amber-ink); background:var(--amber-bg); border-left:3px solid var(--amber); padding:7px 10px; border-radius:0 6px 6px 0}
+  .tutFoot{margin-top:14px; font-size:12.5px; line-height:1.8; color:var(--ink3); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 12px}
+  .tutFoot strong{color:var(--ink2)}
+  .checkRes{margin-top:12px; font-size:12.5px; line-height:1.8}
+  .ckLine{padding:6px 10px; border-radius:6px; margin-top:6px; color:var(--ink2); background:var(--bg)}
+  .ckLine.ok{color:var(--teal-ink); background:var(--teal-bg)}
+  .ckLine.bad{color:var(--red); background:var(--red-bg)}
+  .ckLine.tip{color:var(--ink3); background:transparent; padding-left:0; font-size:12px}
+
+  /* ===== 付费 ===== */
+  .payBtn{background:var(--amber-bg); color:var(--amber-ink); border-color:var(--amber); font-weight:600}
+  .payBtn.paid{background:var(--teal-bg); color:var(--teal-ink); border-color:var(--teal); font-weight:600}
+  .payBox{max-width:400px}
+  .payPrice{font-size:34px; font-weight:700; color:var(--ink); text-align:center; margin:14px 0 6px; letter-spacing:-.5px}
+  .payPrice span{display:block; font-size:12.5px; font-weight:400; color:var(--ink3); margin-top:4px; letter-spacing:0}
+  .payQrWrap{text-align:center; margin:16px 0 8px}
+  .payQr{width:230px; max-width:100%; border-radius:8px; border:1px solid var(--line); display:block; margin:0 auto}
+  .payKeyRow{
+    font-size:12.5px; color:var(--ink2); background:var(--bg); border:1px dashed var(--line2);
+    border-radius:6px; padding:9px 12px; margin-top:14px; text-align:center;
+  }
+  .payKeyRow b{color:var(--ink); font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px; letter-spacing:1px}
+
+  /* ===== 使用说明 ===== */
+  .helpBox{max-width:560px; position:relative}
+  .xBtn{
+    position:absolute; top:14px; right:16px; width:28px; height:28px; border-radius:50%;
+    border:none; background:var(--bg); color:var(--ink3); font-size:19px; cursor:pointer; line-height:1;
+  }
+  .xBtn:hover{background:var(--line); color:var(--ink)}
+  .gItem{margin-top:18px; padding-top:16px; border-top:1px solid var(--line)}
+  .gItem:first-of-type{border-top:none; margin-top:8px; padding-top:0}
+  .gTitle{font-size:14.5px; font-weight:700; color:var(--ink); margin-bottom:6px}
+  .gTitle span{font-size:12px; font-weight:400; color:var(--ink3); margin-left:8px}
+  .gBody{font-size:13.5px; line-height:1.9; color:var(--ink2)}
+  .gBody b{color:var(--ink)}
+  .gBody code{background:var(--bg); padding:1px 6px; border-radius:4px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px}
+  .tagB{color:var(--blue-ink)!important}
+  .tagO{color:var(--amber-ink)!important}
+  .gFoot{
+    margin-top:20px; padding:13px 15px; font-size:12.5px; line-height:1.9;
+    color:var(--ink2); background:var(--bg); border-radius:8px; border:1px solid var(--line);
+  }
+  .gFoot b{color:var(--ink)}
+  .ownerNote{
+    display:none; margin-top:8px; padding:12px 14px; font-size:12.5px; line-height:1.9;
+    color:var(--blue-ink); background:var(--blue-bg); border-radius:8px;
+  }
+  .ownerNote b{color:var(--blue-ink)}
+
+  /* 对话 */
+  #chatLog{display:flex; flex-direction:column; gap:12px}
+  .msg{max-width:100%}
+  .msg .who{font-size:12px; color:var(--ink3); margin-bottom:4px}
+  .msg.user .bubble{background:var(--blue-bg); color:var(--blue-ink); border-radius:var(--r);
+    padding:9px 12px; display:inline-block; white-space:pre-wrap; word-break:break-word}
+  .msg.bot .bubble{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:12px 14px}
+  .evt{font-size:12px; color:var(--ink3); padding:3px 0; font-family:ui-monospace,Consolas,monospace}
+  .evt .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);margin-right:6px;vertical-align:middle}
+
+  /* 输入区 */
+  .composer{background:var(--panel); border-top:1px solid var(--line); padding:10px 14px; flex-shrink:0}
+  .composer .inner{max-width:820px; margin:0 auto; display:flex; gap:8px; align-items:flex-end}
+  textarea{
+    flex:1; resize:none; border:1px solid var(--line2); border-radius:var(--r);
+    padding:9px 11px; font-family:inherit; font-size:14px; line-height:1.5;
+    min-height:42px; max-height:140px; background:var(--bg); color:var(--ink);
+  }
+  textarea:focus{outline:none; border-color:var(--blue)}
+
+  /* 主题面板 */
+  .topics{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px}
+  /* ===== ③ 论点扩写 ===== */
+  .exInput{
+    width:100%; border:1px solid var(--line2); border-radius:var(--r);
+    padding:12px 14px; font-size:14.5px; line-height:1.7; font-family:inherit;
+    resize:vertical; background:var(--panel); color:var(--ink);
+  }
+  .exInput:focus{outline:none; border-color:var(--blue)}
+  .exBar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; flex-wrap:wrap}
+  .exChips{display:flex; gap:7px; flex-wrap:wrap}
+  .exChip{
+    font-size:12.5px; color:var(--ink2); background:var(--panel);
+    border:1px solid var(--line2); border-radius:20px; padding:5px 13px; cursor:pointer;
+  }
+  .exChip:hover{border-color:var(--blue); color:var(--blue); background:var(--blue-bg)}
+  .exCard{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+    padding:18px 20px; margin-top:14px;
+  }
+  .exRow{display:flex; gap:14px; padding:11px 0; border-bottom:1px dashed var(--line)}
+  .exRow:last-of-type{border-bottom:none}
+  .exK{
+    flex:0 0 40px; font-size:13px; font-weight:700; color:var(--panel);
+    background:var(--ink); border-radius:5px; text-align:center; height:24px; line-height:24px;
+  }
+  .exV{flex:1; font-size:14.5px; line-height:1.85; color:var(--ink); min-width:0}
+  .wc{display:inline-block; font-size:11.5px; padding:1px 8px; border-radius:20px; margin-left:6px; vertical-align:middle; white-space:nowrap}
+  .wc.ok{background:#E1F5EE; color:var(--teal-ink)}
+  .wc.warn{background:var(--amber-bg); color:var(--amber-ink)}
+  .exFoot{display:flex; align-items:center; gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); flex-wrap:wrap}
+  .exTip{font-size:12.5px; color:var(--teal-ink); flex:1; min-width:120px}
+  .exTip.warn{color:var(--amber-ink)}
+  .exWarn{
+    margin-top:14px; font-size:12.5px; line-height:1.8; color:var(--amber-ink);
+    background:var(--amber-bg); border-left:3px solid var(--amber);
+    padding:10px 12px; border-radius:0 6px 6px 0;
+  }
+  .exWarn strong{color:var(--ink)}
+
+  .topic{
+    border:1px solid var(--line2); border-radius:var(--r); background:var(--panel);
+    padding:10px 12px; cursor:pointer; text-align:left; font-family:inherit; transition:.15s;
+  }
+  .topic:hover{border-color:var(--blue); background:var(--blue-bg)}
+  .topic .n{font-size:14px; color:var(--ink); font-weight:500; display:block}
+  .topic .c{font-size:12px; color:var(--ink3)}
+  .topic.thin .c{color:var(--amber-ink)}
+
+  /* 渲染后的正文 */
+  .md h2{font-size:16px;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+  .md h3{font-size:15px;margin:14px 0 6px;color:var(--blue-ink)}
+  .md p{margin:7px 0}
+  .md ul,.md ol{margin:6px 0; padding-left:22px}
+  .md li{margin:3px 0}
+  .md strong{font-weight:600}
+  .md hr{border:none;border-top:1px solid var(--line);margin:14px 0}
+  .md blockquote{margin:8px 0;padding:6px 12px;border-left:3px solid var(--line2);color:var(--ink2)}
+  .md table{border-collapse:collapse;margin:10px 0;font-size:13px;width:100%}
+  .md th,.md td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+  .md th{background:#F4F2EC;font-weight:600}
+  .tag{font-size:12px;padding:1px 6px;border-radius:5px;white-space:nowrap}
+  .tag.t{background:var(--blue-bg);color:var(--blue-ink)}
+  .tag.e{background:var(--amber-bg);color:var(--amber-ink)}
+  .err{background:var(--red-bg);color:var(--red);border-radius:8px;padding:8px 11px;font-size:13px;margin:8px 0}
+
+  /* 答题自测 */
+  .quizbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  select{
+    font-family:inherit; font-size:14px; padding:7px 10px; border:1px solid var(--line2);
+    border-radius:8px; background:var(--panel); color:var(--ink); max-width:100%;
+  }
+
+  /* 设置弹层 */
+  .modal{position:fixed;inset:0;background:rgba(20,20,18,.45);display:none;align-items:center;
+    justify-content:center;padding:16px;z-index:50}
+  .modal.on{display:flex}
+  .modal .box{background:var(--panel);border-radius:14px;padding:20px;max-width:440px;width:100%}
+  .modal h2{margin:0 0 6px;font-size:17px}
+  .modal label{display:block;font-size:13px;color:var(--ink2);margin:12px 0 4px}
+  .modal input{width:100%;padding:9px 11px;border:1px solid var(--line2);border-radius:8px;
+    font-family:inherit;font-size:14px;background:var(--bg);color:var(--ink)}
+  .modal input:focus{outline:none;border-color:var(--blue)}
+  .modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+  @media(max-width:600px){
+    header h1{font-size:14px}
+    header .sub{display:none}
+    main{padding:10px}
+    .topics{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>610 设计理论 · 备考工作台</h1>
+  <span class="sub" id="kbStat">加载中…</span>
+  <span class="sub" id="keyState">…</span>
+  <button class="btn small" onclick="openHelp()">使用说明</button>
+  <button class="btn small payBtn" id="payBtn" onclick="openPay()">付费 20 元（必付）</button>
+  <button class="btn small" onclick="openSettings()">设置 Key</button>
+</header>
+
+<nav>
+  <button class="on" data-tab="chat">对话问答</button>
+  <button data-tab="topic">主题整理</button>
+  <button data-tab="expand">论点扩写</button>
+  <button data-tab="quiz">答题自测</button>
+</nav>
+
+<main>
+  <!-- ① 对话 -->
+  <section class="tab on" id="tab-chat">
+    <div id="chatLog">
+      <div class="card">
+        <div class="muted">
+          问我知识点，我会<b>只依据你的资料</b>回答，并标出来源。
+          蓝色标签＝你的老师资料，橙色标签＝公开延伸资料（需自行核对）。<br>
+          资料里没有的内容我会直说"没提到"，不会编。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 主题整理 -->
+  <section class="tab" id="tab-topic">
+    <div class="card">
+      <div class="muted">点一个主题，自动读取该主题<b>全部资料</b>，整理成 8-9 个「论点＋痛点＋阐述＋案例」。</div>
+    </div>
+    <div class="topics" id="topicGrid"></div>
+    <div id="topicOut"></div>
+  </section>
+
+  <!-- ③ 论点扩写 -->
+  <section class="tab" id="tab-expand">
+    <div class="card">
+      <textarea id="exInput" class="exInput" rows="2" placeholder="例：设计深入文化内涵，实现符号的创造性转化"></textarea>
+      <div class="exBar">
+        <div class="exChips">
+          <span class="exChip" onclick="fillEx('设计深入文化内涵，实现符号的创造性转化')">设计与文化</span>
+          <span class="exChip" onclick="fillEx('设计贯穿全生命周期，减少资源消耗')">设计与环境</span>
+          <span class="exChip" onclick="fillEx('厚植符号化编码，构建共享叙事场')">文化传播</span>
+        </div>
+        <button class="btn primary" onclick="doExpand()">开始扩写</button>
+      </div>
+    </div>
+    <div id="exOut"></div>
+  </section>
+
+  <!-- ④ 答题自测 -->
+  <section class="tab" id="tab-quiz">
+    <div class="card">
+      <div class="quizbar">
+        <select id="quizTopic"></select>
+        <button class="btn primary" onclick="quizNew()">出题</button>
+        <button class="btn small" onclick="quizReset()">重来</button>
+      </div>
+      <div class="muted">出题后你在下面输入框写答案提交，我会对照资料批改、指出漏掉的要点。</div>
+    </div>
+    <div id="quizOut"></div>
+  </section>
+</main>
+
+<div class="composer">
+  <div class="inner">
+    <textarea id="input" rows="1" placeholder="输入问题…（Enter 发送 / Shift+Enter 换行）"></textarea>
+    <button class="btn primary" id="sendBtn" onclick="onSend()">发送</button>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <h2>配置 API Key</h2>
+    <div class="muted">需要两个 Key（各申请一次，约 3 分钟）。只存在你自己的浏览器里，不会上传到服务器。<b>没申请过？点下面「如何申请这两个 Key」看图文步骤。</b></div>
+    <label>① DeepSeek API Key（负责回答问题）</label>
+    <input id="kDeep" type="password" placeholder="sk-...">
+    <a class="help" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">↗ 打开 DeepSeek 密钥申请页</a>
+    <label>② 硅基流动 API Key（负责向量检索）</label>
+    <input id="kSilicon" type="password" placeholder="sk-...">
+    <a class="help" href="https://cloud.siliconflow.cn/account/ak" target="_blank" rel="noopener">↗ 打开硅基流动密钥申请页</a>
+
+    <details class="tut">
+      <summary>如何申请这两个 Key（图文步骤 + 花费说明）</summary>
+      <div class="tutBody">
+        <div class="tutItem">
+          <div class="tutH">① DeepSeek Key —— 负责「回答问题」</div>
+          <ol>
+            <li>浏览器打开 <a href="https://platform.deepseek.com" target="_blank" rel="noopener">platform.deepseek.com</a>，用<strong>手机号</strong>注册并登录</li>
+            <li>左侧菜单点 <strong>API Keys</strong>（密钥）</li>
+            <li>点右上角 <strong>创建 API Key</strong>，随便起个名字 → 确定</li>
+            <li><strong>立刻复制</strong>那串以 <code>sk-</code> 开头的字符（<strong>只显示这一次</strong>，关掉就再也看不到）</li>
+            <li>粘贴到上面第一个输入框</li>
+          </ol>
+          <div class="tutTip">花费：新用户有免费额度（约 14 元），用完按 token 计费，一个论点大约 1～2 分钱。绑定银行卡或微信/支付宝充值更方便。</div>
+        </div>
+        <div class="tutItem">
+          <div class="tutH">② 硅基流动 Key —— 负责「查找资料」</div>
+          <ol>
+            <li>浏览器打开 <a href="https://cloud.siliconflow.cn" target="_blank" rel="noopener">cloud.siliconflow.cn</a>，手机号注册并登录</li>
+            <li>完成<strong>实名认证</strong>（这一步必须，否则用不了）</li>
+            <li>领<strong>免费额度</strong>（页面上通常有领券入口，<code>bge-m3</code> 向量模型长期免费）</li>
+            <li>左侧菜单点 <strong>API 密钥</strong> → <strong>新建密钥</strong> → 复制那串 <code>sk-</code> 字符</li>
+            <li>粘贴到上面第二个输入框</li>
+          </ol>
+          <div class="tutTip">花费：注册就有赠送额度，<strong>本工作台用的向量模型 bge-m3 是免费的</strong>，不额外扣费。</div>
+        </div>
+        <div class="tutFoot">
+          <strong>怎么确认自己没填错：</strong>两个 Key 长度不一样——<code>sk-</code> 加上 <strong>DeepSeek 是 35 个字符、硅基流动是 51 个字符</strong>。保存时如果长度对不上，页面会提示你。<br>
+          <strong>填完之后：</strong>点「保存」→ 这个页面会记住你的 Key，<strong>同一个浏览器下次打开就不用再填</strong>（换浏览器或换设备才需要重填）。<br>
+          Key 相当于密码，<strong>不要截图发给别人</strong>。
+        </div>
+      </div>
+    </details>
+
+    <div class="row">
+      <button class="btn" onclick="clearKeys()">清除</button>
+      <button class="btn" onclick="checkKeysNow()">体检</button>
+      <button class="btn" onclick="closeSettings()">取消</button>
+      <button class="btn primary" onclick="saveKeys()">保存</button>
+    </div>
+    <div id="checkResult" class="checkRes"></div>
+  </div>
+</div>
+
+<script>
+/* ============ 状态 ============ */
+const LS_KEY = 'kaoyan610_keys';
+let KEYS = null;
+let TOPICS = [];
+let MODE = 'chat';                 // chat | topic | quiz
+let busy = false;
+
+/* ============ Key 管理（必填：每人用自己的 Key）=========== */
+function loadKeys(){
+  try{ KEYS = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); }catch(e){ KEYS = null; }
+  if(KEYS && (!KEYS.deepseek || !KEYS.siliconflow)) KEYS = null;
+  loadPaid();
+  updateKeyState();
+  updatePayState();
+  if(!KEYS){ setTimeout(openSettings, 400); }
+}
+function updateKeyState(){
+  const tag = document.getElementById('keyState');
+  if(!tag) return;
+  if(KEYS){
+    tag.textContent = 'Key 已配置';
+    tag.style.color = '#16a34a';
+  } else {
+    tag.textContent = '未配置 Key';
+    tag.style.color = '#dc2626';
+  }
+}
+function needKey(){
+  if(KEYS) return false;
+  openSettings();
+  return true;
+}
+function openSettings(){
+  document.getElementById('modal').classList.add('on');
+  if(KEYS){
+    document.getElementById('kDeep').value = KEYS.deepseek || '';
+    document.getElementById('kSilicon').value = KEYS.siliconflow || '';
+  }
+}
+function closeSettings(){ document.getElementById('modal').classList.remove('on'); }
+/* 先做格式自检，把明显填错的情况挡在前面（省得发问才报 401） */
+function checkKeyShape(k, which){
+  if(!k) return '还没填';
+  const t = k.trim();
+  if(t !== k) return '首尾有空格或换行';
+  if(!/^sk-/.test(t)) return '开头不是 sk-（可能漏复制了）';
+  if(/[\s]/.test(t)) return '中间有空格或换行';
+  if(which === 'deepseek' && t.length !== 35) return '长度是 ' + t.length + '，DeepSeek Key 应为 35 个字符（可能没复制全）';
+  if(which === 'silicon' && t.length !== 51) return '长度是 ' + t.length + '，硅基流动 Key 应为 51 个字符（可能没复制全或填错栏）';
+  return null;
+}
+
+function saveKeys(){
+  const d = document.getElementById('kDeep').value.trim();
+  const s = document.getElementById('kSilicon').value.trim();
+  if(!d || !s){
+    alert('两个 Key 都要填。\n\n没申请过？点下方「如何申请这两个 Key」看图文步骤，通常 3 分钟就能拿到。');
+    return;
+  }
+  // 两个 Key 长得不一样（35 vs 51），长度对不上多半是填反了
+  const e1 = checkKeyShape(document.getElementById('kDeep').value, 'deepseek');
+  const e2 = checkKeyShape(document.getElementById('kSilicon').value, 'silicon');
+  if(e1 || e2){
+    let msg = 'Key 看起来有问题：\n\n';
+    if(e1) msg += '· DeepSeek 那一栏：' + e1 + '\n';
+    if(e2) msg += '· 硅基流动那一栏：' + e2 + '\n\n';
+    msg += '多数情况是把 sk- 开头漏掉了，或两个 Key 填反了。\n\n建议：点「清除」清空后重新完整复制粘贴（用 Ctrl+V）。\n\n还是要直接保存吗？';
+    if(!confirm(msg)) return;
+  }
+  KEYS = {deepseek:d, siliconflow:s};
+  localStorage.setItem(LS_KEY, JSON.stringify(KEYS));
+  updateKeyState();
+  closeSettings();
+  // 填好 Key 之后：付款 + 使用说明
+  afterKeysReady();
+}
+/* ===== Key 体检：把"哪里错了"讲清楚，不让用户瞎猜 =====
+   手机上最容易出的三个问题，实测都会导致 401：
+     ① 被引号包住  ② 漏掉开头的 sk-  ③ 只复制了一半
+   前端看不出区别，但这里能逐条报出来。 */
+function checkKeysNow(){
+  const d = document.getElementById('kDeep').value;
+  const s = document.getElementById('kSilicon').value;
+  const box = document.getElementById('checkResult');
+  if(!d || !s){
+    box.innerHTML = '<div class="ckLine bad">· DeepSeek 那一栏是空的</div>' +
+                    (d ? '' : '') + (s ? '' : '<div class="ckLine bad">· 硅基流动那一栏是空的</div>');
+    return;
+  }
+  box.innerHTML = '<div class="ckLine">正在检查…</div>';
+  fetch('/api/checkkey', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({keys:{deepseek:d, siliconflow:s}})
+  }).then(r=>r.json()).then(res=>{
+    const line = (name, r2) => {
+      if(!r2.filled) return '<div class="ckLine bad">· ' + name + '：这一栏是空的</div>';
+      if(r2.ok) return '<div class="ckLine ok">✓ ' + name + ' 格式正确（' + r2.len + ' 字符，尾号 ' + r2.tail + '）</div>';
+      return '<div class="ckLine bad">✗ ' + name + '：<br>' +
+             r2.issues.map(i=>'　· ' + i).join('<br>') + '</div>';
+    };
+    let html = line('DeepSeek', res.deepseek) + line('硅基流动', res.siliconflow);
+    if(res.ok){
+      html += '<div class="ckLine tip">格式都对。若仍报失效，说明 Key 在平台上已被删除或重置，去平台重新创建一个。</div>';
+    } else {
+      html += '<div class="ckLine tip">按上面提示修好再保存。手机上建议用长按→粘贴，不要手动滑动选取。</div>';
+    }
+    box.innerHTML = html;
+  }).catch(()=>{ box.innerHTML = '<div class="ckLine bad">检查请求失败，请检查网络</div>'; });
+}
+
+/* ================= 付费状态 =================
+   规则：20 元一次性对应当前这个 API Key。
+   实现：把「已付费」这件事记成一张 {key指纹: 1} 的表，存在本地。
+        Key 不变 → 指纹不变 → 一直免费用。
+        换了 Key → 指纹变了 → 新指纹不在表里 → 需要再付一次。
+   指纹只用哈希，不存明文，避免泄露。
+
+   —— 但站长自己的 Key 不参与这套逻辑：OWNER_FINGERPRIPS 里的指纹直接放行。
+   这样你既能自己免费用，也能把链接卖给别人收钱。 */
+const PAY_KEY = 'kaoyan610_paid_keys';
+const HELP_KEY = 'kaoyan610_help_seen';
+
+/* 站长自有 Key 指纹（只存哈希，不含明文）。换自己的 Key 时，把新指纹加进来即可。 */
+const OWNER_FINGERPRIPS = [
+  'z-1rao7fw75hyio',   // DeepSeek
+  '1f-11duvt9lq3g1s',  // 硅基流动
+];
+
+let PAID = {};
+
+function keyFingerprint(k){
+  k = (k||'').trim();
+  if(!k) return '';
+  // 用简易哈希而非明文尾号：付费记录存在本地，别留下可追溯的 Key 片段
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
+  for(let i=0; i<k.length; i++){
+    const c = k.charCodeAt(i);
+    h1 = ((h1 ^ c) * 0x01000193) >>> 0;
+    h2 = ((h2 + c) * 0x85ebca6b) >>> 0;
+  }
+  return k.length.toString(36) + '-' + h1.toString(36) + h2.toString(36);
+}
+
+function loadPaid(){
+  try{ PAID = JSON.parse(localStorage.getItem(PAY_KEY) || '{}'); }catch(e){ PAID = {}; }
+  if(!PAID || typeof PAID !== 'object') PAID = {};
+}
+
+function isOwnerKey(){
+  if(!KEYS || !KEYS.deepseek) return false;
+  return OWNER_FINGERPRIPS.indexOf(keyFingerprint(KEYS.deepseek)) >= 0;
+}
+
+function isPaidForCurrentKey(){
+  if(!KEYS || !KEYS.deepseek) return false;
+  if(isOwnerKey()) return true;      // 站长自己的 Key 免费
+  return !!PAID[keyFingerprint(KEYS.deepseek)];
+}
+
+function markPaid(){
+  if(!KEYS || !KEYS.deepseek) return;
+  PAID[keyFingerprint(KEYS.deepseek)] = 1;
+  localStorage.setItem(PAY_KEY, JSON.stringify(PAID));
+  updatePayState();
+}
+
+/* 付费弹窗 */
+function openPay(){
+  // 站长自有 Key：直接放行，不弹任何东西
+  if(isOwnerKey()){ closePay(); return; }
+  const box = document.getElementById('payModal');
+  box.classList.add('on');
+  const kd = KEYS && KEYS.deepseek ? KEYS.deepseek.trim() : '';
+  const tail = kd.length >= 4 ? kd.slice(-4) : '（未填）';
+  document.getElementById('payKeyRow').innerHTML =
+    '本次付费对应的 Key 尾号：<b>' + tail + '</b>　·　备注请填这个尾号';
+}
+function closePay(){ document.getElementById('payModal').classList.remove('on'); }
+function iHavePaid(){
+  if(!KEYS || !KEYS.deepseek){ alert('请先填写并保存 API Key'); return; }
+  markPaid();
+  closePay();
+  alert('已解锁。以后同一个 Key 不会再收费用。');
+}
+
+function updatePayState(){
+  const btn = document.getElementById('payBtn');
+  if(!btn) return;
+  if(isOwnerKey()){
+    btn.textContent = '站长免费';
+    btn.classList.remove('paid');
+    btn.title = '你自己的 Key，无需付费';
+  } else if(isPaidForCurrentKey()){
+    btn.textContent = '已解锁';
+    btn.classList.add('paid');
+    btn.title = '当前 Key 已付费';
+  } else {
+    btn.textContent = '付费 20 元（必付）';
+    btn.classList.remove('paid');
+    btn.title = '当前 Key 尚未付费';
+  }
+}
+
+/* 使用说明 */
+function openHelp(){
+  const n = document.getElementById('ownerNote');
+  if(n) n.style.display = isOwnerKey() ? 'block' : 'none';
+  document.getElementById('helpModal').classList.add('on');
+}
+function closeHelp(){
+  document.getElementById('helpModal').classList.remove('on');
+  try{ localStorage.setItem(HELP_KEY, '1'); }catch(e){}
+}
+
+/* 首次填好 Key 后自动弹：付款 + 使用说明 */
+let _justSaved = false;
+function afterKeysReady(){
+  loadPaid();
+  updatePayState();
+  if(!isPaidForCurrentKey()){ openPay(); }
+  let seen = false;
+  try{ seen = localStorage.getItem(HELP_KEY) === '1'; }catch(e){}
+  // 未付款时先给 0.9 秒让付款窗盖在上层，说明稍后再弹
+  if(!seen){ setTimeout(openHelp, isPaidForCurrentKey() ? 100 : 900); }
+}
+
+function clearKeys(){
+  KEYS = null;
+  localStorage.removeItem(LS_KEY);
+  document.getElementById('kDeep').value = '';
+  document.getElementById('kSilicon').value = '';
+  updateKeyState();
+  updatePayState();
+  closeSettings();
+}
+
+/* 统一的错误处理：识别「Key 无效」，自动清掉坏 Key 并重新弹窗。
+   为什么要这样：Key 会被平台重置、会被删、可能余额耗尽。
+   如果一直留着坏 Key，页面会反复报同一个错，用户以为是自己操作问题。
+   检测到就清掉，让用户重新填一次，问题自动消失。 */
+function handleApiError(msg){
+  if(/Key 无效/.test(msg)){
+    clearKeys();
+    setTimeout(()=>{
+      alert('你保存的 API Key 已失效（可能是在平台上被删除或重置了）。\n\n已经为你清空，请重新填一次。');
+      openSettings();
+    }, 100);
+    return true;
+  }
+  return false;
+}
+
+/* ============ 极简 Markdown 渲染 ============ */
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function md(src){
+  const lines = esc(src).split('\n');
+  let out = [], i = 0, inList = false, listTag = 'ul';
+  function closeList(){ if(inList){ out.push('</'+listTag+'>'); inList=false; } }
+
+  while(i < lines.length){
+    const ln = lines[i];
+
+    // 表格
+    if(/^\s*\|.*\|\s*$/.test(ln) && i+1 < lines.length && /^\s*\|[\s:\-\|]+\|\s*$/.test(lines[i+1])){
+      closeList();
+      const head = ln.trim().replace(/^\||\|$/g,'').split('|').map(s=>s.trim());
+      i += 2;
+      let rows = [];
+      while(i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])){
+        rows.push(lines[i].trim().replace(/^\||\|$/g,'').split('|').map(s=>s.trim()));
+        i++;
+      }
+      out.push('<table><thead><tr>' + head.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>');
+      rows.forEach(r=>{ out.push('<tr>' + r.map(c=>'<td>'+c+'</td>').join('') + '</tr>'); });
+      out.push('</tbody></table>');
+      continue;
+    }
+
+    let m;
+    if(m = ln.match(/^####\s+(.*)$/)){ closeList(); out.push('<h3>'+m[1]+'</h3>'); }
+    else if(m = ln.match(/^#{1,3}\s+(.*)$/)){ closeList(); out.push('<h2>'+m[1]+'</h2>'); }
+    else if(/^\s*([-*_])\s*\1\s*\1[\s\S]*$/.test(ln) && ln.replace(/[\s\-*_]/g,'')===''){ closeList(); out.push('<hr>'); }
+    else if(m = ln.match(/^\s*>\s?(.*)$/)){ closeList(); out.push('<blockquote>'+m[1]+'</blockquote>'); }
+    else if(m = ln.match(/^\s*[-*+]\s+(.*)$/)){ if(!inList||listTag!=='ul'){closeList();out.push('<ul>');inList=true;listTag='ul';} out.push('<li>'+m[1]+'</li>'); }
+    else if(m = ln.match(/^\s*\d+[.)]\s+(.*)$/)){ if(!inList||listTag!=='ol'){closeList();out.push('<ol>');inList=true;listTag='ol';} out.push('<li>'+m[1]+'</li>'); }
+    else if(ln.trim()===''){ closeList(); }
+    else { closeList(); out.push('<p>'+ln+'</p>'); }
+    i++;
+  }
+  closeList();
+  let html = out.join('\n');
+  html = html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  return html;
+}
+
+/* 把（主题）标注染成标签 */
+function paintSources(html){
+  const names = TOPICS.map(t=>t.name);
+  // 延伸资料
+  html = html.replace(/（\s*延伸资料[^）]*）/g, m=>'<span class="tag e">'+m.slice(1,-1)+'</span>');
+  html = html.replace(/（\s*延伸·[^）]*）/g, m=>'<span class="tag e">'+m.slice(1,-1)+'</span>');
+  if(names.length){
+    const re = new RegExp('（(' + names.map(n=>n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')(\\|[^）]*)?）','g');
+    html = html.replace(re, (m, p1)=>'<span class="tag t">'+p1+'</span>');
+  }
+  return html;
+}
+
+/* ============ SSE 调用 ============ */
+/* 付费守卫：未付款则不发起任何请求。
+   放在 callRun 开头而不是各个按钮里，是为了杜绝"改单个按钮就绕过"的可能。 */
+function paidGuard(){
+  loadPaid();
+  if(!KEYS || !KEYS.deepseek){ openSettings(); return false; }
+  if(isPaidForCurrentKey()) return true;
+  openPay();
+  return false;
+}
+
+async function callRun(messages, systemKind, onEvent){
+  if(!paidGuard()){
+    onEvent({type:'error', message:'需要先完成付款才能使用（￥20，对应当前这个 API Key）'});
+    return;
+  }
+  const resp = await fetch('/api/run', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({messages, system: systemKind, keys: KEYS})
+  });
+  if(!resp.ok){
+    let msg = 'HTTP ' + resp.status;
+    try{ const j = await resp.json(); if(j.error) msg = j.error; }catch(e){}
+    onEvent({type:'error', message: msg});
+    return;
+  }
+  const reader = resp.body.getReader();
+  const dec = new TextDecoder('utf-8');
+  let buf = '';
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    buf += dec.decode(value, {stream:true});
+    let idx;
+    while((idx = buf.indexOf('\n\n')) >= 0){
+      const raw = buf.slice(0, idx).trim();
+      buf = buf.slice(idx + 2);
+      if(!raw.startsWith('data:')) continue;
+      const payload = raw.slice(5).trim();
+      if(!payload || payload === '[DONE]') continue;
+      try{ onEvent(JSON.parse(payload)); }catch(e){}
+    }
+  }
+}
+
+/* ============ 通用渲染助手 ============ */
+function bubble(who, cls){
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.innerHTML = '<div class="who">' + who + '</div><div class="bubble"></div>';
+  return d;
+}
+function addErr(container, text){
+  const d = document.createElement('div');
+  d.className = 'err';
+  d.textContent = text;
+  container.appendChild(d);
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ============ ① 对话状态 ============ */
+let chatHistory = [];
+
+function chatLogEl(){ return document.getElementById('chatLog'); }
+
+/* ============ ② 主题整理 ============ */
+let curTopic = null;
+
+function renderTopics(){
+  const grid = document.getElementById('topicGrid');
+  const sel = document.getElementById('quizTopic');
+  grid.innerHTML = ''; sel.innerHTML = '';
+  TOPICS.forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'topic' + (t.count < 10 ? ' thin' : '');
+    b.innerHTML = '<span class="n">' + t.name + '</span><span class="c">' + t.count + ' 块</span>';
+    b.onclick = ()=>genMaterial(t.name);
+    grid.appendChild(b);
+
+    const o = document.createElement('option');
+    o.value = t.name; o.textContent = t.name + '（' + t.count + ' 块）';
+    sel.appendChild(o);
+  });
+}
+
+async function genMaterial(topic){
+  if(busy) return;
+  if(!paidGuard()) return;
+  curTopic = topic;
+  const out = document.getElementById('topicOut');
+  out.innerHTML = '';
+  const b = bubble('「' + topic + '」论述素材', 'bot');
+  const body = b.querySelector('.bubble');
+  body.innerHTML = '<div class="evt"><span class="dot"></span>正在读取该主题全部资料…</div>';
+  out.appendChild(b);
+
+  busy = true; setSendDisabled(true);
+  const evts = []; let answer = null;
+
+  await callRun([{role:'user', content:'帮我整理「' + topic + '」的论述素材，8到9个论点'}], 'default', ev=>{
+    if(ev.type === 'round') evts.push('第 ' + ev.n + ' 轮 → ' + ev.tools.join('、'));
+    else if(ev.type === 'tool') evts.push('　↳ ' + ev.preview);
+    else if(ev.type === 'answer') answer = ev.content;
+    else if(ev.type === 'error'){ if(!handleApiError(ev.message)) evts.push('⚠ ' + ev.message); }
+    if(evts.length) body.innerHTML = '<div class="evt">' + evts.map(t=>'<div><span class="dot"></span>'+t+'</div>').join('') + '</div>';
+  });
+
+  if(answer !== null){
+    body.innerHTML = '<div class="md">' + paintSources(md(answer)) + '</div>';
+    const bar = document.createElement('div');
+    bar.style.marginTop = '10px';
+    bar.innerHTML = '<button class="btn small" onclick="downloadMaterial()">下载为 Markdown</button>';
+    body.appendChild(bar);
+    window.__lastMaterial = answer;
+  } else {
+    body.innerHTML = '<div class="evt">' + evts.map(t=>'<div>'+t+'</div>').join('') + '</div>';
+  }
+  busy = false; setSendDisabled(false);
+}
+
+function downloadMaterial(){
+  const text = '# 610 设计理论 · ' + curTopic + ' 论述素材\n\n> 整理自本地知识库，每个论点均标注资料来源。\n\n' + (window.__lastMaterial || '');
+  const blob = new Blob([text], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = curTopic + '_论述素材.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ============ ③ 论点扩写 ============ */
+function fillEx(t){ document.getElementById('exInput').value = t; }
+
+function countCn(s){ return (s||'').replace(/\s/g,'').length; }
+
+/* 从模型输出里抽出 问题/阐述/案例 三段，并统计字数。
+   注意：模型常把标签写成 **问题：**，所以正则要允许前后有 ** 和空格。 */
+function parseExpand(txt){
+  const r = {q:'', a:'', c:'', raw:txt};
+  const LB = '[\\*\\s]*';   // 标签前允许的 ** 或空白
+  const LA = '[\\*\\s]*';   // 标签后允许的 ** 或空白
+  const all = ['问题','痛点','现实问题','阐述','论证','案例','例如'];
+  const grab = (labels) => {
+    const re = new RegExp('(?:^|\\n)' + LB + '(?:' + labels.join('|') + ')' + LA + '[：:]' + LA +
+                          '([\\s\\S]*?)(?=\\n' + LB + '(?:' + all.join('|') + ')' + LA + '[：:]|$)');
+    const m = txt.match(re);
+    return m ? m[1].replace(/\*+/g, '').replace(/\n+/g, '').trim() : '';
+  };
+  r.q = grab(['问题','痛点','现实问题']);
+  r.a = grab(['阐述','论证']);
+  r.c = grab(['案例','例如']);
+  return r;
+}
+
+/* 目标：阐述 120-145、案例 125-155 */
+function gradeLen(p){
+  const la = countCn(p.a), lc = countCn(p.c);
+  const okA = la >= 115 && la <= 150, okC = lc >= 120 && lc <= 160;
+  return {la:la, lc:lc, okA:okA, okC:okC, all:okA && okC};
+}
+
+function renderExpand(p){
+  const g = gradeLen(p);
+  const badge = (ok, n, lo, hi) =>
+    '<span class="wc ' + (ok ? 'ok' : 'warn') + '">' + (ok ? '✓' : '!') + ' ' + n + ' 字（目标 ' + lo + '-' + hi + '）</span>';
+  return '<div class="exCard">'
+    + (p.q ? '<div class="exRow"><span class="exK">问题</span><div class="exV">' + md(p.q) + '</div></div>' : '')
+    + '<div class="exRow"><span class="exK">阐述</span><div class="exV">' + md(p.a)
+    +   (p.a ? ' ' + badge(g.okA, g.la, 120, 145) : '') + '</div></div>'
+    + '<div class="exRow"><span class="exK">案例</span><div class="exV">' + md(p.c)
+    +   (p.c ? ' ' + badge(g.okC, g.lc, 125, 155) : '') + '</div></div>'
+    + '<div class="exFoot">'
+    +   (g.all
+           ? '<span class="exTip">长度达标，可直接背</span>'
+           : '<span class="exTip warn">长度未达标，可点「再来一版」重写</span>')
+    +   '<button class="btn small" onclick="reExpand()">再来一版</button>'
+    +   '<button class="btn small" onclick="copyExpand()">复制</button>'
+    + '</div></div>';
+}
+
+let lastExpandArgs = null;
+function copyExpand(){
+  const p = window.__lastExpand;
+  if(!p) return;
+  const txt = (p.q ? '问题：' + p.q + '\n\n' : '') + '阐述：' + p.a + '\n\n案例：' + p.c;
+  navigator.clipboard.writeText(txt).then(()=>alert('已复制到剪贴板'), ()=>alert('复制失败，请手动选中复制'));
+}
+function reExpand(){
+  if(!lastExpandArgs) return;
+  doExpand(lastExpandArgs.text, true);
+}
+
+async function doExpand(text, isRetry){
+  if(!paidGuard()) return;
+  const inp = document.getElementById('exInput');
+  if(!isRetry) text = inp.value.trim();
+  if(!text){ alert('请先填一个论点'); return; }
+
+  const out = document.getElementById('exOut');
+  busy = true;
+  const b = bubble(isRetry ? '扩写结果（第二版）' : '扩写结果', 'bot');
+  const body = b.querySelector('.bubble');
+  body.innerHTML = '<div class="evt"><span class="dot"></span>正在资料库里检索依据…</div>';
+  if(!isRetry) out.innerHTML = '';
+  out.appendChild(b);
+  out.scrollTop = out.scrollHeight;
+
+  const claims = text.split('\n').map(s=>s.trim()).filter(s=>s.length > 3);
+  const ask = (isRetry ? '请换一种说法重新展开' : '请展开以下论点：') + '\n' + claims.map(c=>'· ' + c).join('\n');
+
+  const hist = [{role:'user', content:ask}];
+  const evts = [];
+  let answer = null;
+  let warn = null;
+  await callRun(hist, 'expand', ev=>{
+    if(ev.type === 'round'){ evts.push('第 ' + ev.n + ' 轮 → 检索 ' + ev.tools.join('、')); }
+    else if(ev.type === 'tool'){ evts.push('　↳ ' + ev.name + '：' + ev.preview); }
+    else if(ev.type === 'answer'){ answer = ev.content; }
+    else if(ev.type === 'length_warn'){ warn = ev; }
+    else if(ev.type === 'error'){ if(!handleApiError(ev.message)) evts.push('⚠ ' + ev.message); }
+    body.innerHTML = answer ? '' :
+      '<div class="evt">' + evts.map(t=>'<div><span class="dot"></span>'+t+'</div>').join('') + '</div>';
+    out.scrollTop = out.scrollHeight;
+  });
+
+  if(answer !== null){
+    // 多个论点 → 按标题/分隔切成多段分别解析
+    const parts = answer.split(/\n(?=(?:论点|问题)[0-9一二三四五六七八九十]*\s*[：:])/)
+                    .filter(s=>s.trim().length > 20);
+    const chunks = parts.length ? parts : [answer];
+    const cards = chunks.map(txt=>{
+      const p = parseExpand(txt);
+      window.__lastExpand = p;
+      return renderExpand(p);
+    }).join('');
+    const warnBox = warn
+      ? '<div class="exWarn"><strong>自动精简后仍略偏：</strong><br>' +
+        warn.problems.map(p=>'· ' + esc(p)).join('<br>') +
+        '<br>建议点「再来一版」，或手动删一句。</div>'
+      : '';
+    body.innerHTML = cards + warnBox;
+    window.__lastExpandRaw = answer;
+  } else {
+    body.innerHTML = '<div class="evt">' + evts.map(t=>'<div>'+t+'</div>').join('') + '</div>';
+  }
+  lastExpandArgs = {text:text};
+  out.scrollTop = out.scrollHeight;
+  busy = false;
+}
+
+/* ============ ④ 答题自测 ============ */
+let quizHistory = [];
+
+function quizReset(){
+  quizHistory = [];
+  document.getElementById('quizOut').innerHTML = '';
+}
+
+async function quizNew(){
+  if(busy) return;
+  if(!paidGuard()) return;
+  const topic = document.getElementById('quizTopic').value;
+  if(!topic){ alert('请选择主题'); return; }
+  quizReset();
+
+  const out = document.getElementById('quizOut');
+  const b = bubble('出题 · ' + topic, 'bot');
+  const body = b.querySelector('.bubble');
+  body.innerHTML = '<div class="evt"><span class="dot"></span>正在读资料并出题…</div>';
+  out.appendChild(b);
+
+  quizHistory = [{role:'user', content:'请先读「' + topic + '」的资料，然后给我出一道 610 论述题（100 分大题的形式），说明建议从哪几个角度作答，但不要直接给答案。'}];
+
+  busy = true; setSendDisabled(true);
+  const evts = []; let answer = null;
+  await callRun(quizHistory, 'quiz', ev=>{
+    if(ev.type === 'round') evts.push('第 ' + ev.n + ' 轮 → ' + ev.tools.join('、'));
+    else if(ev.type === 'tool') evts.push('　↳ ' + ev.preview);
+    else if(ev.type === 'answer') answer = ev.content;
+    else if(ev.type === 'error'){ if(!handleApiError(ev.message)) evts.push('⚠ ' + ev.message); }
+    if(evts.length) body.innerHTML = '<div class="evt">' + evts.map(t=>'<div><span class="dot"></span>'+t+'</div>').join('') + '</div>';
+  });
+
+  if(answer !== null){
+    quizHistory.push({role:'assistant', content:answer});
+    body.innerHTML = '<div class="md">' + paintSources(md(answer)) + '</div>';
+    document.getElementById('input').placeholder = '在这里写你的答案，Enter 提交批改…';
+  } else {
+    body.innerHTML = '<div class="evt">' + evts.map(t=>'<div>'+t+'</div>').join('') + '</div>';
+  }
+  busy = false; setSendDisabled(false);
+}
+
+async function quizSubmit(text){
+  const out = document.getElementById('quizOut');
+  const u = bubble('我的作答', 'user');
+  u.querySelector('.bubble').textContent = text;
+  out.appendChild(u);
+  quizHistory.push({role:'user', content:'我的作答：\n' + text});
+
+  const b = bubble('批改', 'bot');
+  const body = b.querySelector('.bubble');
+  body.innerHTML = '<div class="evt"><span class="dot"></span>对照资料批改中…</div>';
+  out.appendChild(b);
+
+  busy = true; setSendDisabled(true);
+  const evts = []; let answer = null;
+  await callRun(quizHistory, 'quiz', ev=>{
+    if(ev.type === 'round') evts.push('第 ' + ev.n + ' 轮 → ' + ev.tools.join('、'));
+    else if(ev.type === 'tool') evts.push('　↳ ' + ev.preview);
+    else if(ev.type === 'answer') answer = ev.content;
+    else if(ev.type === 'error'){ if(!handleApiError(ev.message)) evts.push('⚠ ' + ev.message); }
+    if(evts.length) body.innerHTML = '<div class="evt">' + evts.map(t=>'<div><span class="dot"></span>'+t+'</div>').join('') + '</div>';
+  });
+
+  if(answer !== null){
+    quizHistory.push({role:'assistant', content:answer});
+    body.innerHTML = '<div class="md">' + paintSources(md(answer)) + '</div>';
+  } else {
+    body.innerHTML = '<div class="evt">' + evts.map(t=>'<div>'+t+'</div>').join('') + '</div>';
+  }
+  busy = false; setSendDisabled(false);
+}
+
+/* ============ 交互 ============ */
+function setSendDisabled(v){
+  document.getElementById('sendBtn').disabled = v;
+}
+function autoGrow(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+function switchTab(name){
+  MODE = name;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===name));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('on', s.id==='tab-'+name));
+  const input = document.getElementById('input');
+  if(name === 'topic'){
+    input.placeholder = '想聊点别的？在这里提问…';
+    document.getElementById('sendBtn').textContent = '发送';
+  } else if(name === 'expand'){
+    input.placeholder = '也可以在这里直接粘论点，我来帮你扩写…';
+    document.getElementById('sendBtn').textContent = '扩写';
+  } else if(name === 'quiz'){
+    input.placeholder = quizHistory.length ? '写你的答案，Enter 提交批改…' : '先点上面「出题」，再在这里作答…';
+    document.getElementById('sendBtn').textContent = '提交作答';
+  } else {
+    input.placeholder = '输入问题…（Enter 发送 / Shift+Enter 换行）';
+    document.getElementById('sendBtn').textContent = '发送';
+  }
+}
+
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick = ()=>switchTab(b.dataset.tab);
+});
+
+document.getElementById('input').addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    onSend();
+  }
+});
+document.getElementById('input').addEventListener('input', e=>autoGrow(e.target));
+
+/* 统一的发送入口：自测模式下走批改，其余走对话 */
+async function onSend(){
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if(!text || busy) return;
+  if(!paidGuard()) return;
+  // 在「论点扩写」页粘贴论点 → 直接走扩写流程
+  if(MODE === 'expand'){ input.value = ''; switchTab('expand'); doExpand(text); return; }
+  if(MODE === 'quiz' && quizHistory.length){
+    input.value = ''; autoGrow(input);
+    return quizSubmit(text);
+  }
+  if(MODE === 'quiz' && !quizHistory.length){
+    alert('请先点「出题」');
+    return;
+  }
+  // 对话模式（含主题页里的随手提问）
+  const inputEl = input;
+  const log = chatLogEl();
+  inputEl.value = ''; autoGrow(inputEl);
+
+  const u = bubble('你', 'user');
+  u.querySelector('.bubble').textContent = text;
+  log.appendChild(u);
+  chatHistory.push({role:'user', content:text});
+
+  const b = bubble('助手', 'bot');
+  const body = b.querySelector('.bubble');
+  body.innerHTML = '<div class="evt"><span class="dot"></span>思考中…</div>';
+  log.appendChild(b);
+  log.scrollTop = log.scrollHeight;
+
+  busy = true; setSendDisabled(true);
+  const evts = []; let answer = null;
+
+  await callRun(chatHistory, 'default', ev=>{
+    if(ev.type === 'round') evts.push('第 ' + ev.n + ' 轮 → 调用 ' + ev.tools.join('、'));
+    else if(ev.type === 'tool') evts.push('　↳ ' + ev.name + '：' + ev.preview);
+    else if(ev.type === 'answer') answer = ev.content;
+    else if(ev.type === 'error'){ if(!handleApiError(ev.message)) evts.push('⚠ ' + ev.message); }
+    if(evts.length && answer === null){
+      body.innerHTML = '<div class="evt">' + evts.map(t=>'<div><span class="dot"></span>'+t+'</div>').join('') + '</div>';
+    }
+  });
+
+  if(answer !== null){
+    chatHistory.push({role:'assistant', content:answer});
+    body.innerHTML = '<div class="md">' + paintSources(md(answer)) + '</div>';
+  } else {
+    body.innerHTML = '<div class="evt">' + evts.map(t=>'<div>'+t+'</div>').join('') + '</div>';
+  }
+  log.scrollTop = log.scrollHeight;
+  busy = false; setSendDisabled(false);
+}
+
+/* ============ 启动 ============ */
+async function boot(){
+  loadKeys();
+  try{
+    const r = await fetch('/api/health');
+    const h = await r.json();
+    document.getElementById('kbStat').textContent = h.ready
+      ? ('知识库 ' + h.chunks + ' 块 / ' + h.topics + ' 主题')
+      : '知识库未加载';
+    const t = await (await fetch('/api/topics')).json();
+    TOPICS = t.topics || [];
+    renderTopics();
+  }catch(e){
+    document.getElementById('kbStat').textContent = '服务连接失败';
+  }
+}
+boot();
+</script>
+
+<!-- ===== 付费弹窗 ===== -->
+<div class="modal" id="payModal">
+  <div class="box payBox">
+    <h2>使用前需完成一次付费</h2>
+    <div class="payPrice">￥20 <span>一次性 · 对应当前这个 API Key</span></div>
+
+    <div class="muted" style="line-height:1.9;margin-bottom:6px">
+      本工作台需付费 <b>￥20</b> 后使用，<b>对应当前这个 API Key</b>。
+    </div>
+    <div class="muted" style="line-height:1.9">
+      扫描下方二维码付款，<b>付款备注请填写你 Key 的尾 4 位</b>（例如 <code>40bc</code>），
+      这样我能确认是你本人付款。<br>
+      <b>同一个 Key 只需付一次</b>，之后换浏览器、换设备、重新打开页面都不会再收。
+      只有你<b>主动更换 API Key</b> 时，才需要再付一次。
+    </div>
+
+    <div class="payQrWrap">
+      <img src="/static/pay-qr.jpg" alt="微信收款码" class="payQr">
+    </div>
+
+    <div class="muted" style="text-align:center;font-size:12.5px">
+      微信扫一扫，向 SuMim 付款 ￥20
+    </div>
+
+    <div class="payKeyRow" id="payKeyRow"></div>
+
+    <div class="row">
+      <button class="btn" onclick="closePay()">关闭</button>
+      <button class="btn primary" onclick="iHavePaid()">我已完成付款</button>
+    </div>
+    <div class="muted" style="text-align:center;font-size:12px;margin-top:4px">
+      付款 20 元后才能使用。付款备注请填上面显示的 Key 尾号，方便核对。
+    </div>
+  </div>
+</div>
+
+<!-- ===== 使用说明弹窗 ===== -->
+<div class="modal" id="helpModal">
+  <div class="box helpBox">
+    <button class="xBtn" onclick="closeHelp()">×</button>
+    <h2>四个板块怎么用</h2>
+    <div id="ownerNote" class="ownerNote">
+      <b>提示：</b>你用的是管理员的 Key，<b>本账号不参与付费</b>，所有功能直接可用。
+    </div>
+
+    <div class="gItem">
+      <div class="gTitle">① 对话问答 <span>问具体知识点</span></div>
+      <div class="gBody">
+        直接提问，比如「设计与环境里关于全生命周期的原话是什么」。
+        回答<b>只依据你的资料</b>，并标注出处主题——<b class="tagB">蓝色</b>是你的老师资料，
+        <b class="tagO">橙色</b>是公开延伸资料（需自行核对）。<br>
+        资料里没有的内容它会直说没有，不会编。
+      </div>
+    </div>
+
+    <div class="gItem">
+      <div class="gTitle">② 主题整理 <span>批量出论点</span></div>
+      <div class="gBody">
+        21 个主题做成按钮，点一下它会<b>读完该主题全部资料</b>，整理出 8-9 个
+        「论点＋痛点＋阐述＋案例」，可一键下载为 md。<br>
+        块数少于 10 的主题标成橙色，说明资料偏薄，整理出的论点可能不够用。
+      </div>
+    </div>
+
+    <div class="gItem">
+      <div class="gTitle">③ 论点扩写 <span>按你给的论点展开</span></div>
+      <div class="gBody">
+        你自己想好一个论点（写成「短句A，短句B」最好），填进去点「开始扩写」。
+        它会先在资料库里找依据，再从<b>「为什么这个论点是对的」</b>和<b>「基于这个论点要怎么做」</b>
+        两个角度写阐述，并配一个具体案例。<br>
+        每段带<b>字数徽章</b>：绿色达标可直背，橙色偏长偏短可点「再来一版」。<br>
+        一次贴多行会逐个展开。<b>它不会改你的论点</b>；资料里没有依据时会直说没有。
+      </div>
+    </div>
+
+    <div class="gItem">
+      <div class="gTitle">④ 答题自测 <span>出题并批改</span></div>
+      <div class="gBody">
+        选一个主题点「出题」，它会出一道浙工大 610 论述大题风格的题（100 分那道），
+        <b>但不直接给答案</b>。你在下面输入框写答案提交，它会对照资料逐条批改：
+        哪些要点答到了、哪些漏了、论据够不够，最后给一个改进框架。
+      </div>
+    </div>
+
+    <div class="gFoot">
+      <b>关于付费：</b>使用前需一次性支付 <b>￥20</b>，对应当前这个 API Key。
+      <b>同一个 Key 只收一次</b>，换浏览器/换设备/重新打开都不再收；
+      只有你<b>主动更换 API Key</b> 时才需要再付。<br>
+      <b>关于额度：</b>用的是你自己的 API Key，<b>API 费用由平台直接从你的账户扣</b>，
+      不是从 20 元里出——20 元是本工作台的使用费。<br>
+      <b>关于隐私：</b>Key 只存在你这台设备的浏览器里，服务器不保存、不记录。
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <button class="btn primary" onclick="closeHelp()">知道了，开始使用</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
